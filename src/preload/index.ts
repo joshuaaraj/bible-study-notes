@@ -10,7 +10,9 @@ contextBridge.exposeInMainWorld('api', {
   bible: {
     getBooks: (): Promise<unknown[]> => ipcRenderer.invoke('bible:getBooks'),
     getChapter: (bookId: number, chapterNum: number): Promise<unknown[]> =>
-      ipcRenderer.invoke('bible:getChapter', bookId, chapterNum)
+      ipcRenderer.invoke('bible:getChapter', bookId, chapterNum),
+    searchReference: (query: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('bible:searchReference', query)
   },
   notes: {
     getForScope: (scope: unknown): Promise<unknown[]> =>

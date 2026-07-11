@@ -17,6 +17,8 @@ import { createLowlight, common } from 'lowlight'
 import { Node } from '@tiptap/core'
 import { File } from 'lucide-react'
 import Toolbar from './Toolbar'
+import { VerseReference } from './extensions/VerseReference'
+import { VerseReferenceSuggestion } from './VerseSuggestion'
 
 const lowlight = createLowlight(common)
 
@@ -105,7 +107,9 @@ export default function RichTextEditor({ content, onChange, noteId }: Props): JS
       Placeholder.configure({ placeholder: 'Start writing your note…' }),
       Typography,
       CharacterCount,
-      PdfAttachmentExtension
+      PdfAttachmentExtension,
+      VerseReference,
+      VerseReferenceSuggestion
     ],
     content: (() => {
       try {
@@ -130,6 +134,11 @@ export default function RichTextEditor({ content, onChange, noteId }: Props): JS
       /* ignore invalid JSON */
     }
   }, [noteId])
+
+  function insertVerseRef(): void {
+    if (!editor) return
+    editor.chain().focus().insertContent('#').run()
+  }
 
   async function insertImage(): Promise<void> {
     if (!editor) return
@@ -195,6 +204,7 @@ export default function RichTextEditor({ content, onChange, noteId }: Props): JS
           editor={editor}
           onInsertImage={insertImage}
           onInsertAttachment={insertAttachment}
+          onInsertVerseRef={insertVerseRef}
         />
       )}
       <div className="flex-1 overflow-y-auto">

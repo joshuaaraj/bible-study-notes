@@ -2,13 +2,14 @@ import type { Editor } from '@tiptap/react'
 import {
   Bold, Italic, Strikethrough, Code, Heading1, Heading2, Heading3,
   List, ListOrdered, CheckSquare, Quote, Minus, Table,
-  Code2, Link, Image, Paperclip, Undo, Redo
+  Code2, Link, Image, Paperclip, Undo, Redo, BookMarked
 } from 'lucide-react'
 
 interface Props {
   editor: Editor
   onInsertImage: () => void
   onInsertAttachment: () => void
+  onInsertVerseRef: () => void
 }
 
 function Btn({
@@ -39,7 +40,7 @@ function Divider(): JSX.Element {
   return <div className="w-px h-5 bg-slate-200 mx-1" />
 }
 
-export default function Toolbar({ editor, onInsertImage, onInsertAttachment }: Props): JSX.Element {
+export default function Toolbar({ editor, onInsertImage, onInsertAttachment, onInsertVerseRef }: Props): JSX.Element {
   function setLink(): void {
     const url = window.prompt('Enter URL:', editor.getAttributes('link').href)
     if (url === null) return
@@ -118,6 +119,9 @@ export default function Toolbar({ editor, onInsertImage, onInsertAttachment }: P
       </Btn>
       <Btn title="Attach File" onClick={onInsertAttachment}>
         <Paperclip className="w-4 h-4" />
+      </Btn>
+      <Btn title="Insert Verse Reference (# or @)" onClick={onInsertVerseRef}>
+        <BookMarked className="w-4 h-4" />
       </Btn>
 
       <Divider />

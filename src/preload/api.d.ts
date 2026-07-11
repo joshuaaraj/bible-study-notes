@@ -12,6 +12,7 @@ declare global {
       bible: {
         getBooks(): Promise<unknown[]>
         getChapter(bookId: number, chapterNum: number): Promise<unknown[]>
+        searchReference(query: string): Promise<unknown[]>
       }
       notes: {
         getForScope(scope: unknown): Promise<unknown[]>
