@@ -1,6 +1,38 @@
 # Bible Study Notes
 
-A personal Bible study note-taking app for Windows and Linux. Browse all 66 books of the Bible (KJV), write rich-text notes scoped to a verse, verse range, chapter, or entire book, and search everything with full-text search.
+A personal, offline Bible study app for Windows and Linux. Read the full Bible, write rich-text notes tied to specific verses or passages, reference verses inline while writing, and search everything instantly — all stored locally in a folder you control.
+
+---
+
+## Features
+
+### Bible Reader
+- Browse all 66 books of the Bible (KJV) — Old and New Testament
+- Navigate by book → chapter → verse
+- Verse indicator dots show which verses already have notes attached
+
+### Note Taking
+- **Scoped notes** — attach a note to a single verse, a verse range (e.g. Gen 1:1–5), a chapter, a chapter range (e.g. 1:10–2:3), or an entire book
+- **Auto-populate** — when you open a new note, the selected verses are automatically quoted as a blockquote so you can write directly beneath them
+- **Rich text editor** — headings, bold/italic, bullet and numbered lists, checklists, blockquotes, tables, inline code, code blocks, images, and links
+- **Verse references** — type `@` or `#` anywhere in a note to search and insert an inline verse chip (e.g. `Jn 3:16`); hover to see the verse text
+
+### Search & Organisation
+- Full-text search across all your notes with highlighted excerpts
+- Recently edited notes shown on the browser home screen
+- Scope label on every note card (e.g. "Genesis 1:1–3", "Romans 8")
+
+### Attachments & Export
+- Attach PDF files to notes — they appear as clickable cards inside the editor and open in your system viewer
+- Embed images directly in note content
+- Export any note to PDF
+
+### Data & Privacy
+- Everything stored locally — no account, no cloud, no telemetry
+- You choose the folder on first launch; your notes live there as a SQLite database
+- Back up by copying the folder
+
+---
 
 ## Download & Install
 
@@ -38,17 +70,19 @@ Go to the [Releases](https://github.com/joshuaaraj/bible-study-notes/releases/la
    ```
 3. Launch **Bible Study Notes** from your application menu
 
-## Features
+---
 
-- Browse all 66 Bible books → chapters → verses (KJV text)
-- Rich text editor: headings, lists, checklists, tables, blockquotes, code blocks, images, links
-- Notes scoped to a verse, verse range, chapter, or entire book
-- Verse text is automatically copied into new notes as a blockquote
-- Full-text search across all your notes
-- PDF attachments
-- Export notes to PDF
-- All data stored locally in a folder you choose
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+S` | Save current note |
+| `Ctrl+B` | Bold |
+| `Ctrl+I` | Italic |
+| `@` or `#` | Insert verse reference |
+
+---
 
 ## Data
 
-Your notes are stored in a SQLite database inside the folder you pick on first launch. To back up your notes, just copy that folder.
+Notes are stored in a SQLite database inside the folder you pick on first launch. To back up, copy that folder. To move to a new machine, copy the folder and point the app at it on first launch.
