@@ -1,7 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { Extension } from '@tiptap/core'
 import { ReactRenderer } from '@tiptap/react'
-import Suggestion from '@tiptap/suggestion'
+import { Suggestion } from '@tiptap/suggestion'
+import { PluginKey } from '@tiptap/pm/state'
 import type { SuggestionKeyDownProps, SuggestionProps } from '@tiptap/suggestion'
 import type { VerseRef, VerseRefAttrs } from '../../types/bible'
 
@@ -94,8 +95,8 @@ function positionPopup(
 
 // ─── Suggestion renderer factory ─────────────────────────────────────────────
 
-function buildRenderer() {
-  return (): ReturnType<NonNullable<Parameters<typeof Suggestion>[0]['render']>> => {
+function buildRenderer(): () => ReturnType<NonNullable<SuggestionProps['render']>> {
+  return () => {
     let renderer: ReactRenderer<VerseSuggestionListHandle> | null = null
 
     return {
@@ -128,16 +129,19 @@ function buildRenderer() {
   }
 }
 
+// Each trigger needs its own unique PluginKey — sharing the default key crashes the editor.
+const hashPluginKey = new PluginKey('verseReferenceSuggestionHash')
+const atPluginKey = new PluginKey('verseReferenceSuggestionAt')
+
 // ─── TipTap Extension ─────────────────────────────────────────────────────────
 
 export const VerseReferenceSuggestion = Extension.create({
   name: 'verseReferenceSuggestion',
 
   addProseMirrorPlugins() {
-    const render = buildRenderer()
-
-    const makePlugin = (char: string) =>
+    const makePlugin = (char: string, pluginKey: PluginKey) =>
       Suggestion<VerseRef>({
+        pluginKey,
         editor: this.editor,
         char,
         allowSpaces: true,
@@ -166,9 +170,12 @@ export const VerseReferenceSuggestion = Extension.create({
             .insertVerseReference(attrs)
             .run()
         },
-        render
+        render: buildRenderer()
       })
 
-    return [makePlugin('#'), makePlugin('@')]
+    return [
+      makePlugin('#', hashPluginKey),
+      makePlugin('@', atPluginKey)
+    ]
   }
 })

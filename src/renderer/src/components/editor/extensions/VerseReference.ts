@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import type { VerseRefAttrs } from '../../../types/bible'
+import { VerseReferenceView } from '../VerseReferenceView'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -43,8 +44,6 @@ export const VerseReference = Node.create({
   },
 
   addNodeView() {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { VerseReferenceView } = require('../VerseReferenceView')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return ReactNodeViewRenderer(VerseReferenceView as any)
   },
