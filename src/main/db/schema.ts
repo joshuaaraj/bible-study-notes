@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 export const SCHEMA_SQL = `
 PRAGMA journal_mode = WAL;
@@ -6,9 +6,10 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS notes (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    scope_type   TEXT    NOT NULL CHECK(scope_type IN ('verse','verse_range','chapter','book')),
+    scope_type   TEXT    NOT NULL CHECK(scope_type IN ('verse','verse_range','chapter','chapter_range','book')),
     book_id      INTEGER NOT NULL,
     chapter_num  INTEGER,
+    chapter_end  INTEGER,
     verse_start  INTEGER,
     verse_end    INTEGER,
     title        TEXT    NOT NULL DEFAULT '',

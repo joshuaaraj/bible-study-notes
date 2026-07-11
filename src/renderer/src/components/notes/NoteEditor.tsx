@@ -42,9 +42,35 @@ async function fetchVerseContent(
   bookId: number,
   chapterNum: number | null,
   verseStart: number | null,
-  verseEnd: number | null
+  verseEnd: number | null,
+  chapterEnd: number | null
 ): Promise<string> {
   if (scopeType === 'book' || !chapterNum) return EMPTY_CONTENT
+
+  if (scopeType === 'chapter_range' && chapterEnd) {
+    const nodes: object[] = []
+    for (let ch = chapterNum; ch <= chapterEnd; ch++) {
+      const chVerses = (await window.api.bible.getChapter(bookId, ch)) as BibleVerse[]
+      const filtered =
+        ch === chapterNum && verseStart ? chVerses.filter((v) => v.num >= verseStart)
+        : ch === chapterEnd && verseEnd ? chVerses.filter((v) => v.num <= verseEnd)
+        : chVerses
+      filtered.forEach((v) =>
+        nodes.push({
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: `${ch}:${v.num}  ` },
+            { type: 'text', text: v.text }
+          ]
+        })
+      )
+    }
+    if (nodes.length === 0) return EMPTY_CONTENT
+    return JSON.stringify({
+      type: 'doc',
+      content: [{ type: 'blockquote', content: nodes }, { type: 'paragraph', content: [] }]
+    })
+  }
 
   const allVerses = (await window.api.bible.getChapter(bookId, chapterNum)) as BibleVerse[]
 
@@ -108,7 +134,7 @@ export default function NoteEditor(): JSX.Element {
     if (!isNewNote || savedId !== null) return
     if (!scope.scope_type || !scope.book_id) return
 
-    const key = `${scope.scope_type}-${scope.book_id}-${scope.chapter_num}-${scope.verse_start}-${scope.verse_end}`
+    const key = `${scope.scope_type}-${scope.book_id}-${scope.chapter_num}-${scope.chapter_end ?? ''}-${scope.verse_start}-${scope.verse_end}`
     if (key === lastFetchedScope.current) return
     lastFetchedScope.current = key
 
@@ -117,7 +143,8 @@ export default function NoteEditor(): JSX.Element {
       scope.book_id,
       scope.chapter_num ?? null,
       scope.verse_start ?? null,
-      scope.verse_end ?? null
+      scope.verse_end ?? null,
+      scope.chapter_end ?? null
     ).then((json) => {
       setContent(json)
       setEditorKey((k) => k + 1)
@@ -133,6 +160,7 @@ export default function NoteEditor(): JSX.Element {
       scope_type: (scope.scope_type as CreateNoteInput['scope_type']) ?? 'book',
       book_id: scope.book_id ?? selectedBookId ?? 1,
       chapter_num: scope.chapter_num ?? null,
+      chapter_end: scope.chapter_end ?? null,
       verse_start: scope.verse_start ?? null,
       verse_end: scope.verse_end ?? null,
       title,

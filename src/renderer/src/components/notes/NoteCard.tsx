@@ -14,6 +14,11 @@ function scopeLabel(note: Note, bookName: string): string {
   if (note.scope_type === 'chapter') return `${book} ${ch}`
   if (note.scope_type === 'verse') return `${book} ${ch}:${note.verse_start}`
   if (note.scope_type === 'verse_range') return `${book} ${ch}:${note.verse_start}–${note.verse_end}`
+  if (note.scope_type === 'chapter_range') {
+    const start = note.verse_start ? `${ch}:${note.verse_start}` : `${ch}`
+    const end = note.verse_end ? `${note.chapter_end}:${note.verse_end}` : `${note.chapter_end}`
+    return `${book} ${start}–${end}`
+  }
   return book
 }
 

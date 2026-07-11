@@ -1,10 +1,11 @@
-export type ScopeType = 'verse' | 'verse_range' | 'chapter' | 'book'
+export type ScopeType = 'verse' | 'verse_range' | 'chapter' | 'chapter_range' | 'book'
 
 export interface Note {
   id: number
   scope_type: ScopeType
   book_id: number
   chapter_num: number | null
+  chapter_end: number | null
   verse_start: number | null
   verse_end: number | null
   title: string
@@ -17,6 +18,7 @@ export interface CreateNoteInput {
   scope_type: ScopeType
   book_id: number
   chapter_num: number | null
+  chapter_end: number | null
   verse_start: number | null
   verse_end: number | null
   title: string
@@ -29,6 +31,7 @@ export interface SearchResult {
   scope_type: ScopeType
   book_id: number
   chapter_num: number | null
+  chapter_end: number | null
   verse_start: number | null
   verse_end: number | null
   updated_at: string
