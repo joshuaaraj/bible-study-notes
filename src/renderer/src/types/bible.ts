@@ -17,6 +17,7 @@ export interface VerseRef {
   abbrev: string
   chapterNum: number
   verseNum: number
+  verseEnd: number | null
   text: string
 }
 
@@ -26,5 +27,6 @@ export interface VerseRefAttrs {
   abbrev: string
   chapterNum: number
   verseNum: number
+  verseEnd: number | null
   verseText: string
 }

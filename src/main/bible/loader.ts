@@ -69,6 +69,7 @@ export interface VerseRef {
   abbrev: string
   chapterNum: number
   verseNum: number
+  verseEnd: number | null
   text: string
 }
 
@@ -76,17 +77,27 @@ interface ParsedRef {
   bookQuery: string
   chapterNum: number | null
   verseNum: number | null
+  verseEnd: number | null
 }
 
 function parseReference(query: string): ParsedRef {
   const normalized = query.trim().toLowerCase().replace(/\s+/g, ' ')
   let verseNum: number | null = null
+  let verseEnd: number | null = null
   let pre = normalized
 
   const colonIdx = normalized.indexOf(':')
   if (colonIdx !== -1) {
-    const v = parseInt(normalized.slice(colonIdx + 1).trim(), 10)
-    verseNum = isNaN(v) ? null : v
+    const afterColon = normalized.slice(colonIdx + 1).trim()
+    // Range: "23:1-5"
+    const rangeMatch = afterColon.match(/^(\d+)-(\d+)$/)
+    if (rangeMatch) {
+      verseNum = parseInt(rangeMatch[1], 10)
+      verseEnd = parseInt(rangeMatch[2], 10)
+    } else {
+      const v = parseInt(afterColon, 10)
+      verseNum = isNaN(v) ? null : v
+    }
     pre = normalized.slice(0, colonIdx).trim()
   }
 
@@ -94,10 +105,10 @@ function parseReference(query: string): ParsedRef {
   // "1 john 3" → book="1 john", ch=3; "1 john" → book="1 john", ch=null
   const trailing = pre.match(/^(.+?)\s+(\d+)$/)
   if (trailing) {
-    return { bookQuery: trailing[1], chapterNum: parseInt(trailing[2], 10), verseNum }
+    return { bookQuery: trailing[1], chapterNum: parseInt(trailing[2], 10), verseNum, verseEnd }
   }
 
-  return { bookQuery: pre, chapterNum: null, verseNum: null }
+  return { bookQuery: pre, chapterNum: null, verseNum: null, verseEnd: null }
 }
 
 function matchBook(bookQuery: string, books: RawBook[]): RawBook | undefined {
@@ -114,7 +125,7 @@ function matchBook(bookQuery: string, books: RawBook[]): RawBook | undefined {
 export function searchReference(query: string, limit = 20): VerseRef[] {
   if (!query || query.trim().length < 2) return []
 
-  const { bookQuery, chapterNum, verseNum } = parseReference(query)
+  const { bookQuery, chapterNum, verseNum, verseEnd } = parseReference(query)
   if (!bookQuery) return []
 
   const bible = loadBible()
@@ -125,14 +136,25 @@ export function searchReference(query: string, limit = 20): VerseRef[] {
   const push = (chNum: number, v: BibleVerse): void => {
     results.push({
       bookId: book.id, bookName: book.name, abbrev: book.abbrev,
-      chapterNum: chNum, verseNum: v.num, text: v.text
+      chapterNum: chNum, verseNum: v.num, verseEnd: null, text: v.text
     })
   }
 
   if (chapterNum !== null) {
     const ch = book.chapters.find((c) => c.num === chapterNum)
     if (!ch) return []
-    if (verseNum !== null) {
+    if (verseNum !== null && verseEnd !== null) {
+      // Range: return a single combined result
+      const rangeVerses = ch.verses.filter((v) => v.num >= verseNum! && v.num <= verseEnd!)
+      if (rangeVerses.length > 0) {
+        const combinedText = rangeVerses.map((v) => v.text).join(' ')
+        const truncated = combinedText.length > 200 ? combinedText.slice(0, 200) + '…' : combinedText
+        results.push({
+          bookId: book.id, bookName: book.name, abbrev: book.abbrev,
+          chapterNum: ch.num, verseNum, verseEnd, text: truncated
+        })
+      }
+    } else if (verseNum !== null) {
       const v = ch.verses.find((v) => v.num === verseNum)
       if (v) push(ch.num, v)
     } else {

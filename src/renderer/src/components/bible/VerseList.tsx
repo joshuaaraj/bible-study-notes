@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight, PlusCircle } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 import type { BibleVerse } from '../../types/bible'
 import type { VerseNoteInfo } from '../../types/notes'
-import { PlusCircle } from 'lucide-react'
 
 export default function VerseList(): JSX.Element {
-  const { selectedBookId, selectedChapter, openNewNote } = useAppStore()
+  const {
+    selectedBookId, selectedChapter, highlightedVerseNum, clearHighlight,
+    openNewNote, goBack, goForward, history, historyIndex
+  } = useAppStore()
   const [verses, setVerses] = useState<BibleVerse[]>([])
   const [verseNotes, setVerseNotes] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(false)
+  const verseRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   useEffect(() => {
     if (!selectedBookId || !selectedChapter) {
@@ -34,6 +38,24 @@ export default function VerseList(): JSX.Element {
     })
   }, [selectedBookId, selectedChapter])
 
+  // Scroll to and briefly highlight the target verse
+  useEffect(() => {
+    if (!highlightedVerseNum) return
+    const el = verseRefs.current.get(highlightedVerseNum)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('bg-indigo-50')
+      const timer = setTimeout(() => {
+        el.classList.remove('bg-indigo-50')
+        clearHighlight()
+      }, 1800)
+      return () => clearTimeout(timer)
+    }
+  }, [highlightedVerseNum, verses])
+
+  const canGoBack = historyIndex > 0
+  const canGoForward = historyIndex < history.length - 1
+
   if (!selectedBookId || !selectedChapter) {
     return (
       <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
@@ -52,8 +74,24 @@ export default function VerseList(): JSX.Element {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 max-w-3xl">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-800">
+      <div className="mb-6 flex items-center gap-2">
+        <button
+          onClick={goBack}
+          disabled={!canGoBack}
+          title="Go back"
+          className={`p-1 rounded transition-colors ${canGoBack ? 'text-slate-500 hover:text-slate-800 hover:bg-slate-100' : 'text-slate-300 cursor-not-allowed'}`}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <button
+          onClick={goForward}
+          disabled={!canGoForward}
+          title="Go forward"
+          className={`p-1 rounded transition-colors ${canGoForward ? 'text-slate-500 hover:text-slate-800 hover:bg-slate-100' : 'text-slate-300 cursor-not-allowed'}`}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+        <h2 className="text-xl font-bold text-slate-800 flex-1">
           Chapter {selectedChapter}
         </h2>
         <button
@@ -69,7 +107,11 @@ export default function VerseList(): JSX.Element {
         {verses.map((verse) => (
           <div
             key={verse.num}
-            className="flex gap-3 group cursor-pointer"
+            ref={(el) => {
+              if (el) verseRefs.current.set(verse.num, el)
+              else verseRefs.current.delete(verse.num)
+            }}
+            className="flex gap-3 group cursor-pointer rounded-md transition-colors px-1 -mx-1"
             onClick={() => openNewNote(verse.num)}
           >
             <span className="text-indigo-500 font-bold text-sm mt-0.5 w-7 flex-shrink-0 select-none">

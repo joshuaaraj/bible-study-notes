@@ -65,8 +65,8 @@ export const VerseSuggestionList = forwardRef<VerseSuggestionListHandle, ListPro
               i === selected ? 'bg-indigo-50' : 'hover:bg-slate-50'
             ].join(' ')}
           >
-            <span className="shrink-0 font-semibold text-indigo-600 text-xs w-20 pt-px">
-              {item.abbrev} {item.chapterNum}:{item.verseNum}
+            <span className="shrink-0 font-semibold text-indigo-600 text-xs w-24 pt-px">
+              {item.abbrev} {item.chapterNum}:{item.verseNum}{item.verseEnd ? `–${item.verseEnd}` : ''}
             </span>
             <span className="text-slate-500 text-xs leading-snug line-clamp-2">
               {item.text}
@@ -163,6 +163,7 @@ export const VerseReferenceSuggestion = Extension.create({
             abbrev:     props.abbrev,
             chapterNum: props.chapterNum,
             verseNum:   props.verseNum,
+            verseEnd:   props.verseEnd ?? null,
             verseText:  props.text
           }
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

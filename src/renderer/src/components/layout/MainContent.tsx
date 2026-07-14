@@ -10,20 +10,20 @@ export default function MainContent(): JSX.Element {
   const showNoteEditor = openNoteId !== null || isNewNote
 
   return (
-    <div className="flex flex-1 overflow-hidden relative">
-      {activeView === 'bible' && (
-        <>
-          <ChapterGrid />
-          <VerseList />
-        </>
-      )}
-      {activeView === 'notes-browser' && <NotesBrowser />}
+    <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
+        {activeView === 'bible' && (
+          <>
+            <ChapterGrid />
+            <VerseList />
+          </>
+        )}
+        {activeView === 'notes-browser' && <NotesBrowser />}
+      </div>
 
       {showNoteEditor && (
-        <div className="absolute inset-0 bg-black/20 flex justify-end z-10">
-          <div className="w-full max-w-2xl bg-white shadow-2xl flex flex-col h-full overflow-hidden">
-            <NoteEditor />
-          </div>
+        <div className="w-[640px] flex-shrink-0 bg-white shadow-lg flex flex-col overflow-hidden border-l border-slate-200">
+          <NoteEditor />
         </div>
       )}
     </div>

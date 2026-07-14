@@ -25,6 +25,7 @@ export const VerseReference = Node.create({
       abbrev:     { default: '' },
       chapterNum: { default: null },
       verseNum:   { default: null },
+      verseEnd:   { default: null },
       verseText:  { default: '' }
     }
   },
@@ -34,8 +35,10 @@ export const VerseReference = Node.create({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    const { abbrev, chapterNum, verseNum, verseText } = node.attrs as VerseRefAttrs
-    const label = `${abbrev} ${chapterNum}:${verseNum}`
+    const { abbrev, chapterNum, verseNum, verseEnd, verseText } = node.attrs as VerseRefAttrs
+    const label = verseEnd
+      ? `${abbrev} ${chapterNum}:${verseNum}–${verseEnd}`
+      : `${abbrev} ${chapterNum}:${verseNum}`
     return [
       'span',
       mergeAttributes(HTMLAttributes, { 'data-verse-ref': '', title: verseText }),

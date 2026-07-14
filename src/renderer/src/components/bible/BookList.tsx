@@ -4,7 +4,7 @@ import type { BibleBook } from '../../types/bible'
 
 export default function BookList(): JSX.Element {
   const [books, setBooks] = useState<BibleBook[]>([])
-  const { selectedBookId, setSelectedBook } = useAppStore()
+  const { selectedBookId, setSelectedBook, setActiveView } = useAppStore()
 
   useEffect(() => {
     window.api.bible.getBooks().then((b) => setBooks(b as BibleBook[]))
@@ -20,6 +20,7 @@ export default function BookList(): JSX.Element {
         key={book.id}
         onClick={() => {
           setSelectedBook(book.id)
+          setActiveView('bible')
         }}
         className={`w-full text-left px-4 py-1.5 text-sm transition-colors ${
           active
