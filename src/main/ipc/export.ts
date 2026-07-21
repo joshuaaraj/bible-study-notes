@@ -15,6 +15,7 @@ export function registerExportHandlers(): void {
     let contentHtml = ''
     try {
       const { generateHTML } = await import('@tiptap/html')
+      const { Node, mergeAttributes } = await import('@tiptap/core')
       const { StarterKit } = await import('@tiptap/starter-kit')
       const { TaskList } = await import('@tiptap/extension-task-list')
       const { TaskItem } = await import('@tiptap/extension-task-item')
@@ -24,6 +25,48 @@ export function registerExportHandlers(): void {
       const { TableRow } = await import('@tiptap/extension-table-row')
       const { TableHeader } = await import('@tiptap/extension-table-header')
       const { TableCell } = await import('@tiptap/extension-table-cell')
+
+      // Schema-only versions of custom nodes (no React/NodeView needed for HTML generation)
+      const VerseReferenceExport = Node.create({
+        name: 'verseReference',
+        group: 'inline',
+        inline: true,
+        atom: true,
+        addAttributes: () => ({
+          bookId: { default: null }, bookName: { default: '' }, abbrev: { default: '' },
+          chapterNum: { default: null }, verseNum: { default: null },
+          verseEnd: { default: null }, verseText: { default: '' }
+        }),
+        parseHTML: () => [{ tag: 'span[data-verse-ref]' }],
+        renderHTML({ node, HTMLAttributes }) {
+          const { abbrev, chapterNum, verseNum, verseEnd } = node.attrs as Record<string, unknown>
+          const label = verseEnd
+            ? `${abbrev} ${chapterNum}:${verseNum}–${verseEnd}`
+            : `${abbrev} ${chapterNum}:${verseNum}`
+          return ['span', mergeAttributes(HTMLAttributes, {
+            'data-verse-ref': '',
+            style: 'background:#ede9fe;color:#5b21b6;border-radius:4px;padding:1px 5px;font-size:0.85em;font-weight:600;'
+          }), label]
+        }
+      })
+
+      const PdfAttachmentExport = Node.create({
+        name: 'pdfAttachment',
+        group: 'block',
+        atom: true,
+        addAttributes: () => ({
+          filePath: { default: null }, fileName: { default: null }, fileSize: { default: 0 }
+        }),
+        parseHTML: () => [{ tag: 'div[data-pdf-attachment]' }],
+        renderHTML({ node, HTMLAttributes }) {
+          const { fileName, fileSize } = node.attrs as Record<string, unknown>
+          const sizeKb = Math.round(((fileSize as number) || 0) / 1024)
+          return ['div', mergeAttributes(HTMLAttributes, {
+            'data-pdf-attachment': '',
+            style: 'border:1px solid #ccc;border-radius:4px;padding:8px 12px;margin:8px 0;font-size:0.9em;color:#555;'
+          }), `📎 ${fileName || 'Attachment'} (${sizeKb} KB)`]
+        }
+      })
 
       const doc = JSON.parse(note.content)
       contentHtml = generateHTML(doc, [
@@ -35,9 +78,12 @@ export function registerExportHandlers(): void {
         Table,
         TableRow,
         TableHeader,
-        TableCell
+        TableCell,
+        VerseReferenceExport,
+        PdfAttachmentExport
       ])
-    } catch {
+    } catch (err) {
+      console.error('[export] generateHTML failed:', err)
       contentHtml = `<pre>${note.content}</pre>`
     }
 
